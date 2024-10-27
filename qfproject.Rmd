@@ -1,0 +1,380 @@
+---
+title: "QuantitativeFinanceProject"
+output:
+  pdf_document:
+    latex_engine: xelatex # or pdflatex
+    keep_tex: yes
+    number_sections: yes
+    toc: yes
+header-includes:
+  - "\\usepackage{listings}" # Required for code chunk formatting
+date: "2023-09-24"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,
+                      tidy = TRUE, 
+                      autodep = TRUE, 
+                      out.width = "100%", 
+                      fig.width = 6, 
+                      fig.height = 4)
+```
+\newpage
+# Group assignment of introduction to Quantitative Finance  
+Hand-in date: 22.10.2023  
+Campus: BI Oslo  
+Examination code : ELE 3911  
+Examination name: Introduction to Quantitative Finance  
+
+## Introduction  
+Within this appendix, we provide a detailed overview of the R code used in the quantitative analysis of the data-set in the context of the Introduction to Quantitative Finance coursework assignment. The R code is accompanied by explanatory comments written in Markdown. To help the reader, the code sections are enumerated to facilitate cross-referencing with the main text. This supplementary material is designed to assist in comprehending the quantitative methods applied and the solutions provided in the main solution paper.
+
+## Prepare  
+In the code sections 1-2 we will load the libraries useful to our analysis, import the data-set and clean the data.
+
+[code section: 1]
+```{r, tidy=TRUE}
+# IMPORTING PACKAGES
+
+#install.packages("formatR")
+#install.packages("ggplot2")
+#install.packages("moments")
+
+library(ggplot2)
+library(moments)
+
+set.seed(42)
+```
+
+[code section: 2]
+```{r, tidy=TRUE}
+# IMPORTING AND CLEANING P2P LOANS DATASET
+
+# importing data-set as data-frame from .csv file with relative path
+p2ploans = read.csv("p2ploans.csv",
+                      sep = ",",
+                      dec = ".",
+                      header = T,
+                      colClasses = "character")
+
+print("P2P loans dataframe:")
+str(p2ploans)
+
+# converting numerical variables in numeric data type
+for (tempVar in c('interest_rate', 'maturity', 'dti_ratio', 'risk_free', 'yearly_payment')){
+  p2ploans[[tempVar]] <- as.numeric(p2ploans[[tempVar]])
+}
+```
+\newpage
+
+# Task 1
+
+## 1.a   
+The following chunk of code computes the mean and median statistics for the yearly payment variable of the data-set, exploiting the related built-in functions of R.  
+
+[code section: 3]
+```{r, tidy=TRUE}
+# COMPUTING STATISTICS OF THE yearly_payment VARIABLE
+
+meanYearlyPayment = mean(p2ploans$yearly_payment)
+medianYearlyPayment = median(p2ploans$yearly_payment)
+
+cat("The mean of the yearly payments is:", meanYearlyPayment, "\n")
+cat("The median of the yearly payments is:", medianYearlyPayment)
+```
+We used the "summary" function to gain a deeper understanding of our data-set, its useful to observe some more statistics about the distribution of our variables.  
+
+[code section: 4]
+```{r, tidy=TRUE}
+# COMPUTING STATISTICS OF THE VARIABLES
+
+summary(p2ploans)
+```
+
+## 1.b  
+In the following lines we used ggplot to construct a histogram of the yearly payment with 20 bins.  
+
+[code section: 5]
+```{r, tidy=TRUE}
+# HISTOGRAM PLOT OF THE YEARLY PAYMENT
+
+ggplot(p2ploans,
+       aes(x = yearly_payment)) + geom_histogram(colour = "white",
+                                                 fill = "lightblue", 
+                                                 bins = 20,
+                                                 linetype = "longdash") +
+  ggtitle("Histogram plot of yearly payment") + xlab("yearly payment") + ylab("observations")
+```
+
+## 1.d
+The following chunk of code computes the skewness and kurtosis statistics for the yearly payment variable of the data-set, exploiting the related built-in functions of R.  
+
+[code section: 6]
+```{r, tidy=TRUE}
+skewnessYearlyPayment = skewness(p2ploans$yearly_payment)
+kurtosisYearlyPayment = kurtosis(p2ploans$yearly_payment)
+
+cat("The skeweness of the yearly payments is:", skewnessYearlyPayment, "\n")
+cat("The kurtosis of the yearly payments is:", kurtosisYearlyPayment)
+```
+
+## 1.e  
+In the chunk that follows we set the parameters for the triangular distribution for modelling yearly payment based on p2ploans data. 
+
+[code section: 7]
+```{r, tidy=TRUE}
+# TRIANGULAR DISTRIBUTION TO MODEL YEARLY PAYMENTS
+
+# computing the approximate mode, useful for continuous data like yearly payment
+custom_mode <- function(x) {
+  table_x <- table(x)
+  mode_value <- as.numeric(names(table_x[table_x == max(table_x)]))
+  return(mode_value)
+}
+
+minYearlyPayment = min(p2ploans$yearly_payment)
+maxYearlyPayment = max(p2ploans$yearly_payment)
+modeYearlyPayment = custom_mode(round(p2ploans$yearly_payment, digits = -2))
+
+cat("The min value of the yearly payments is:", minYearlyPayment, "\n")
+cat("The max value of the yearly payments is:", maxYearlyPayment, "\n")
+cat("The mode of the yearly payments is:", modeYearlyPayment)
+```                         
+
+## 1.f  
+As depicted in the code excerpt below, we identified the loan with the largest yearly payment and, assuming that payments are made at the end of each year and that we discount payments at the risk free rate of 1.72%, we computed the present value of the first yearly payment made on the loan.
+
+[code section: 8]
+```{r, tidy=TRUE}
+# FIRST YEAR PRESENT VALUE COMPUTATIONS ON HIGHEST YEARLY PAYMENT LOAN
+
+# finding loan with the highest yearly payment and reporting its id
+largestYearlyPaymentLoan = subset(p2ploans, yearly_payment == max(p2ploans$yearly_payment))
+largestYearlyPaymentLoan_id = largestYearlyPaymentLoan$id
+cat("ID associated to the loan with the highest yearly payment:", largestYearlyPaymentLoan_id, "\n")
+
+# computing the present value of the first yearly payment of the loan
+largestYearlyPayment_presentValue_year1 = largestYearlyPaymentLoan$yearly_payment * (1 + largestYearlyPaymentLoan$risk_free / 100) ^ (- 1)
+cat("Present value of the first yearly payment made on the loan with the highest yearly payment:", largestYearlyPayment_presentValue_year1)
+```
+## 1.g  
+Below, we computed the present value of yearly payments to the platform over the duration of the loan.  
+
+[code section: 9]
+```{r, tidy=TRUE}
+# PRESENT VALUE COMPUTATIONS ON HIGHEST YEARLY PAYMENT LOAN
+
+largestYearlyPayment_presentValue_year2 = largestYearlyPaymentLoan$yearly_payment * (1 + largestYearlyPaymentLoan$risk_free / 100) ^ (- 2)
+largestYearlyPayment_presentValue_year3 = largestYearlyPaymentLoan$yearly_payment * (1 + largestYearlyPaymentLoan$risk_free / 100) ^ (- 3)
+largestYearlyPayment_presentValue_year4 = largestYearlyPaymentLoan$yearly_payment * (1 + largestYearlyPaymentLoan$risk_free / 100) ^ (- 4)
+largestYearlyPayment_presentValue_year5 = largestYearlyPaymentLoan$yearly_payment * (1 + largestYearlyPaymentLoan$risk_free / 100) ^ (- 5)
+
+LargestYearlyPayment_presentValue = sum(largestYearlyPayment_presentValue_year1,
+                                       largestYearlyPayment_presentValue_year2,
+                                       largestYearlyPayment_presentValue_year3,
+                                       largestYearlyPayment_presentValue_year4,
+                                       largestYearlyPayment_presentValue_year5)
+
+cat("Present value of the payments made on the loan with the highest yearly payment:", LargestYearlyPayment_presentValue)
+```
+\newpage
+# Task 2
+
+## 2.a   
+Moving forward in the code, we computed the expected value of of the first yearly payment for the loan with id = 5, assuming probability of default of 0.05 for loans that have not entered default, irrespective of the year of payment.
+
+[code section: 10]
+```{r, tidy=TRUE}
+# EXPECTED VALUE OF FIRST YEARLY PAYMENT OF LOAN WITH ID = 5
+
+# taking data of the loan
+id5Loan = subset(p2ploans, id == 5)
+cat("The maturity of the loan with id = 5 is:", id5Loan$maturity, "years \n")
+
+# defining probability of default at first year and computing probability of non default
+pd_1year = 0.05 # probability of default at first year
+pnd_1year = 1 - pd_1year # probability of non default at first year
+
+# computing expected value
+id5Loan_expectedValue_year1 = id5Loan$yearly_payment * pnd_1year
+cat("The expected value of first yearly payment of loan with id = 5 is", id5Loan_expectedValue_year1)
+```
+## 2.b  
+Below, we computed the expected value of the final yearly payment of the loan with id = 5.
+
+[code section: 11]
+```{r, tidy=TRUE}
+# EXPECTED VALUE OF FINAL YEARLY PAYMENT OF LOAN WITH ID = 5
+
+# computing probability of default and non default at third year
+pd_3year = pd_1year + pnd_1year * pd_1year + pnd_1year * pnd_1year * pd_1year # probability of default by last (third) year
+pnd_3year = pnd_1year ^ 3 # probability of non default at last (third) year
+
+# checking that probabilities sum to 1
+flag = pd_3year + pnd_3year
+cat("The sum of probabilities of default and non default at third year is", flag, "\n")
+
+id5Loan_expectedValue_year3 = id5Loan$yearly_payment * pnd_3year
+cat("The expected value of final (third) yearly payment of loan with id = 5 is", id5Loan_expectedValue_year3)
+```
+
+## 2.e    
+In the course of the following code, we computed the expected number of defaults in the first year, the variance of the number of defaults and the skewness of the number of defaults.
+
+[code section: 12]
+```{r, tidy=TRUE}
+# EXPECTED VALUE, VARIANCE AND SKEWENESS OF DEFAULTS IN THE FIRST YEAR (CONSIDERING ALL LOANS)
+
+defaults_expectedValue_1year = pd_1year * nrow(p2ploans) # expected value
+defaults_variance_1year = nrow(p2ploans) * pd_1year * (1 - pd_1year) # variance
+defaults_skeweness_1year = ((1 - pd_1year) - pd_1year) / sqrt(defaults_variance_1year) # skewness
+
+cat("The expected number of defaults in the first year is", defaults_expectedValue_1year, "\n")
+cat("The varince of the number of defaults in the first year is", defaults_variance_1year, "\n")
+cat("The skeweness of the number of defaults in the first year is", defaults_skeweness_1year)
+
+#expected because it's five percent of the total
+```
+
+## 2.f    
+In the chunk that comes next, we considered the aggregate yearly payment flows to the platform from the loans with id values of 1-10, and computed the sum of expected payments at the end of the first year, assuming that the default probability for each loan is 0.05.    
+
+[code section: 13]
+```{r, tidy=TRUE}
+# SUM OF EXPECTED PAYMENTS OF LOANS WITH IDs 1-10 AT THE END OF FIRST YEAR 
+
+expectedReturns <- (1 - pd_1year) * p2ploans[p2ploans$id %in% 1:10,]$yearly_payment
+sumExpectedReturs <- sum(expectedReturns)
+cat("The sum of the expected payments of loans with ids 1-10 at the end of the first year is", sumExpectedReturs)
+```
+
+\newpage
+# Task 3
+
+## 3.a     
+In the following lines of code we computed the mean of the interest rate for AA and HR groups, and their difference in percentage points.           
+
+[code section: 14]
+```{r, tidy=TRUE}
+# MEAN OF THE INTEREST RATE FOR AA AND HR GROUPS
+
+meanInterestRate_AAgroup <- mean(p2ploans[p2ploans$internal_rating == "AA", ]$interest_rate)
+meanInterestRate_HRgroup <- mean(p2ploans[p2ploans$internal_rating == "HR", ]$interest_rate)
+percentagePointsDifference <- abs((meanInterestRate_AAgroup - meanInterestRate_HRgroup))
+
+cat("The mean interest rate for the AA group is", meanInterestRate_AAgroup, "\n")
+cat("The mean interest rate for the HR group is", meanInterestRate_HRgroup, "\n")
+cat("Difference in Percentage Points:", percentagePointsDifference)
+# AA is less risky than HR
+```
+
+## 3.c     
+Within the chunks below, we regressed the interest rate on the internal rating, exploiting the lm() built-in function of R. While in code section 15 the model takes into account the intercept and discard the factor(internal_rating)A, in code section 16 a new model is implemented, which takes into account all the factors and discards the intercept.   
+
+[code section: 15]
+```{r, tidy=TRUE}
+# LINEAR REGRESSION MODEL FOR INTEREST RATE ON THE INTERNAL RATINGS
+
+model <- lm(interest_rate ~ factor(internal_rating), data = p2ploans)
+summary(model)
+```
+
+[code section: 16]
+```{r, tidy=TRUE}
+# LINEAR REGRESSION MODEL FOR INTEREST RATE ON THE INTERNAL RATINGS NOT CONSIDERING THE INTERCEPT
+
+model_nointercep <- lm(interest_rate ~ 0 + factor(internal_rating), data = p2ploans)
+summary(model)
+```
+
+## 3.d    
+Within the following lines of code, we added to the model created in code section 16 two new regressors: dti_ratio and maturity.    
+
+[code section: 17]
+```{r, tidy=TRUE}
+# LINEAR REGRESSION MODEL FOR INTEREST RATE USING INTERNAL RATINGS, DTI RATIO AND MATURITY
+
+model_dtiMaturity <- lm(interest_rate ~ 0 + factor(internal_rating) + dti_ratio + maturity, data = p2ploans)
+summary(model_dtiMaturity)
+```
+
+\newpage
+# Task 4
+
+## 4.a     
+In the subsequent lines of code, we simulated the first year of payments 1000 times for all loans in the E and HR internal rating groups (description of the algorithm deployed is included in the solution paper): we used this data to construct a histogram with 20 bins.    
+
+[code section: 18]
+```{r, tidy=TRUE}
+# SIMULATING FOR 1000 TIMES THE SUCCESS OF THE FIRST YEAR PAYMENTS OF LOANS IN THE E AND HR INTERNAL RATING GROUPS
+loansEHR = p2ploans[p2ploans$internal_rating %in% c("E", "HR"), ]
+
+sumOfPayments_df = data.frame(simulation_number = numeric(0), sum_of_payments = numeric(0))
+
+for (i in 1:1000) {
+  value = 0
+  for (j in 1:nrow(loansEHR)){
+    trial = runif(1)
+    if (p2ploans[j,]$internal_rating == "E"){
+      if (trial >= 0.15){
+        value = value + p2ploans[j,]$yearly_payment
+      }
+    }
+    else{
+      if (trial >= 0.30){
+        value = value + p2ploans[j,]$yearly_payment
+      }
+    }
+  }
+  new_row = data.frame(simulation_number = i, sum_of_payments = value)
+  sumOfPayments_df <- rbind(sumOfPayments_df, new_row)
+}
+
+# histogram plot
+ggplot(data = sumOfPayments_df, aes(x = sum_of_payments)) + geom_histogram(colour = "white",
+                                                 fill = "lightblue", 
+                                                 bins = 20,
+                                                 linetype = "longdash") +
+  ggtitle("Simulated distribution of first payments considering rating-related default rate") + xlab("sum of first year payments") + ylab("occurences")
+```
+
+## 4.c
+The following chunk of code computes the mean and standard deviation statistics for the yearly payment variable of the data-set, exploiting the related built-in functions of R. In code section 20, we computed also the expected value.       
+
+[code section: 19]
+```{r, tidy=TRUE}
+# MEAN AND MEDIAN VALUES OF SUM OF PAYMENTS OVER THE 1000 SIMULATIONS
+meanSumOfPayments = mean(sumOfPayments_df$sum_of_payments)
+standardDeviationSumOfPayments = sd(sumOfPayments_df$sum_of_payments)
+
+cat("The mean of the sum of payments over the 1000 simulations is", meanSumOfPayments, "\n")
+cat("The standard deviation of the sum of payments over the 1000 simulations is", standardDeviationSumOfPayments)
+```
+
+[code section: 20]
+```{r, tidy=TRUE}
+# EXPECTED VALUE OF SUM OF PAYMENTS OVER THE 1000 SIMULATIONS
+expectedValueSumOfPayments = 0
+
+for (i in 1:nrow(loansEHR)){
+  if (loansEHR[i,]$internal_rating == "E"){
+    expectedValueSumOfPayments = expectedValueSumOfPayments + p2ploans[i,]$yearly_payment * 0.85
+  }
+  else if (loansEHR[i,]$internal_rating == "HR"){
+    expectedValueSumOfPayments = expectedValueSumOfPayments + p2ploans[i,]$yearly_payment * 0.70
+  }
+}
+
+cat("The expected value of the sum of payments over the 1000 simulations is", expectedValueSumOfPayments)
+```
+## 4.d
+
+Continuing with the code, we computed the 95% VaR for total payments across the 1000 simulations.       
+
+[code section: 21]
+```{r, tidy=TRUE}
+# COMPUTATION OF VALUE AT RISK
+
+VaR_95 = quantile(sumOfPayments_df$sum_of_payments, probs = 0.05)
+cat("The 95% Value at Risk (VaR) is", VaR_95)
+```

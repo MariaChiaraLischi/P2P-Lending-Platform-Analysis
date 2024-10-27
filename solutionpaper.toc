@@ -1,0 +1,28 @@
+\babel@toc {english}{}\relax 
+\contentsline {section}{\numberline {1}Task 1}{1}{section.1}%
+\contentsline {paragraph}{\textcolor {Blue}{1.a}}{1}{section*.2}%
+\contentsline {paragraph}{\textcolor {Blue}{1.b}}{1}{section*.3}%
+\contentsline {paragraph}{\textcolor {Blue}{1.c}}{2}{section*.5}%
+\contentsline {paragraph}{\textcolor {Blue}{1.d}}{2}{section*.6}%
+\contentsline {paragraph}{\textcolor {Blue}{1.e}}{2}{section*.7}%
+\contentsline {paragraph}{\textcolor {Blue}{1.f}}{2}{section*.8}%
+\contentsline {paragraph}{\textcolor {Blue}{1.g}}{3}{section*.9}%
+\contentsline {section}{\numberline {2}Task 2}{4}{section.2}%
+\contentsline {paragraph}{\textcolor {Blue}{2.a}}{4}{section*.10}%
+\contentsline {paragraph}{\textcolor {Blue}{2.b}}{4}{section*.11}%
+\contentsline {paragraph}{\textcolor {Blue}{2.c}}{5}{section*.12}%
+\contentsline {paragraph}{\textcolor {Blue}{2.d}}{5}{section*.13}%
+\contentsline {paragraph}{\textcolor {Blue}{2.e}}{5}{section*.14}%
+\contentsline {paragraph}{\textcolor {Blue}{2.f}}{6}{section*.15}%
+\contentsline {paragraph}{\textcolor {Blue}{2.g}}{6}{section*.16}%
+\contentsline {section}{\numberline {3}Task 3}{8}{section.3}%
+\contentsline {paragraph}{\textcolor {Blue}{3.a}}{8}{section*.17}%
+\contentsline {paragraph}{\textcolor {Blue}{3.b}}{8}{section*.18}%
+\contentsline {paragraph}{\textcolor {Blue}{3.c}}{9}{section*.19}%
+\contentsline {paragraph}{\textcolor {Blue}{3.d}}{10}{section*.22}%
+\contentsline {paragraph}{\textcolor {Blue}{3.e}}{11}{section*.23}%
+\contentsline {section}{\numberline {4}Task 4}{12}{section.4}%
+\contentsline {paragraph}{\textcolor {Blue}{4.a}}{12}{section*.25}%
+\contentsline {paragraph}{\textcolor {Blue}{4.b}}{12}{section*.27}%
+\contentsline {paragraph}{\textcolor {Blue}{4.c}}{13}{section*.28}%
+\contentsline {paragraph}{\textcolor {Blue}{4.d}}{13}{section*.29}%
