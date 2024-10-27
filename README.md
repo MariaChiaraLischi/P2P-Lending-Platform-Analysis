@@ -1,4 +1,4 @@
-# Quantitative-Finance
+# Quantitative Finance Project
 
 This project was completed as part of the coursework for the course Introduction to Quantitative Finance during the exchange at BI Norwegian Business School as part of the Bachelor’s degree program in Management and Computer Science at Luiss Guido Carli University.
 
